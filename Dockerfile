@@ -27,7 +27,7 @@ RUN apk update && apk add --no-cache ffmpeg ffmpeg-libs ca-certificates && updat
 
 RUN addgroup -g 101 -S owncast && adduser -u 101 -S owncast -G owncast
 
-# Copy owncast assets
+# Copy owncast asset
 WORKDIR /app
 COPY --from=build /build/owncast /app/owncast
 RUN mkdir /app/data
