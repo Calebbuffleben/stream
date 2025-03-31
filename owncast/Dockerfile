@@ -35,3 +35,5 @@ RUN chown -R owncast:owncast /app
 USER owncast
 ENTRYPOINT ["/app/owncast"]
 EXPOSE 8080 1935
+
+
