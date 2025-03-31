@@ -1,0 +1,89 @@
+name: Go Tests
+
+on:
+  push:
+    paths-ignore:
+      - 'web/**'
+  pull_request:
+    paths-ignore:
+      - 'web/**'
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: [1.23.x, 1.24.x]
+        os: [ubuntu-latest, macos-latest, windows-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get changed files
+        id: changed-files-yaml
+        uses: tj-actions/changed-files@v45
+        with:
+          files_yaml: |
+            src:
+              - '**/*.{go,mod,sum}'
+
+      - uses: actions/cache@v4
+        if: steps.changed-files-yaml.outputs.src_any_changed == 'true'
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-test-${{ github.sha }}
+          restore-keys: |
+            go-test-
+
+      - name: Install go
+        if: steps.changed-files-yaml.outputs.src_any_changed == 'true'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '^1'
+          cache: true
+
+      - name: Run tests
+        if: steps.changed-files-yaml.outputs.src_any_changed == 'true'
+        run: go test ./...
+
+  test-bsds:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        os:
+          - name: freebsd
+            version: 12.2
+          - name: openbsd
+            version: 6.8
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get changed files
+        id: changed-files-yaml
+        uses: tj-actions/changed-files@v45
+        with:
+          files_yaml: |
+            src:
+              - '**/*.{go,mod,sum}'
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-test-${{ github.sha }}
+          restore-keys: |
+            go-test-
+
+      - name: Install go
+        if: steps.changed-files-yaml.outputs.src_any_changed == 'true'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '^1'
+          cache: true
+
+      - name: Run tests
+        if: steps.changed-files-yaml.outputs.src_any_changed == 'true'
+        run: go test ./...
